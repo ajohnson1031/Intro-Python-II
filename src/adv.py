@@ -1,10 +1,12 @@
+import sys
 from room import Room
+from player import Player
 
 # Declare all the rooms
 
 room = {
     'outside':  Room("Outside Cave Entrance",
-                     "North of you, the cave mount beckons"),
+                      "North of you, the cave mount beckons."),
 
     'foyer':    Room("Foyer", """Dim light filters in from the south. Dusty
 passages run north and east."""),
@@ -18,7 +20,7 @@ to north. The smell of gold permeates the air."""),
 
     'treasure': Room("Treasure Chamber", """You've found the long-lost treasure
 chamber! Sadly, it has already been completely emptied by
-earlier adventurers. The only exit is to the south."""),
+earlier adventurers. The only exit is to the south.""")
 }
 
 
@@ -37,8 +39,12 @@ room['treasure'].s_to = room['narrow']
 # Main
 #
 
-# Make a new player object that is currently in the 'outside' room.
+TGREEN =  '\033[32m'
+TRED = '\033[31m'
+TYELLOW = '\033[33m'
+ENDC = '\033[m'
 
+# Make a new player object that is currently in the 'outside' room.
 # Write a loop that:
 #
 # * Prints the current room name
@@ -49,3 +55,51 @@ room['treasure'].s_to = room['narrow']
 # Print an error message if the movement isn't allowed.
 #
 # If the user enters "q", quit the game.
+my_player = Player("", room['outside'])
+   
+def adv_game(inp=None):
+    
+    def print_status():
+        print(TGREEN + f"\n{my_player.player_name} has moved to the {my_player.current_room.room_name}\n\n{my_player.current_room.description}\n", ENDC)          
+    
+    if inp == None:
+        inp = input("Please enter your name: ").strip()
+        my_player.player_name = inp;
+        print(TYELLOW + f"Welcome, {inp}! You are currently in the {my_player.current_room.room_name}.\n", ENDC)
+        adv_game("")
+    else:
+        try:
+            inp = input("Please choose a valid cardinal direction (N, S, E or W): ").strip().lower()
+            while inp != 'q':            
+                if inp == "n" and hasattr(my_player.current_room, 'n_to'):
+                    my_player.current_room = my_player.current_room.n_to
+                    print_status()
+                    adv_game(inp)
+                    break
+                elif inp == "s" and hasattr(my_player.current_room, 's_to'):
+                    my_player.current_room = my_player.current_room.s_to
+                    print_status()
+                    adv_game(inp)
+                    break
+                elif inp == "e" and hasattr(my_player.current_room, 'e_to'):
+                    my_player.current_room = my_player.current_room.e_to
+                    print_status()
+                    adv_game(inp)
+                    break
+                elif inp == "w" and hasattr(my_player.current_room, 'w_to'):
+                    my_player.current_room = my_player.current_room.w_to  
+                    print_status()
+                    adv_game(inp)
+                    break
+                else:                
+                    print(TRED + f"\nCan't go that way, {my_player.player_name}!\n", ENDC)
+                    adv_game(inp)
+                    break
+            
+        except:
+            print("Sorry, game is out of order... :(")
+            
+        
+adv_game()
+
+# 
